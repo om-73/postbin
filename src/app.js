@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Global middleware for deterministic time
 app.use(timeMiddleware);
@@ -22,7 +22,7 @@ app.use('/p', viewRoutes);
 
 // Simple root route for creating pastes (frontend)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 });
 
 
