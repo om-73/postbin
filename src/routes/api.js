@@ -31,7 +31,9 @@ router.post('/pastes', async (req, res) => {
 
     try {
         const paste = await pasteService.createPaste(content, ttl_seconds, max_views, req.now);
-        const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const baseUrl = process.env.BASE_URL || `${protocol}://${host}`;
 
         res.status(201).json({
             id: paste.id,
