@@ -2,13 +2,16 @@ const Redis = require('ioredis');
 const MockRedis = require('ioredis-mock');
 require('dotenv').config();
 
-const useMock = process.env.USE_REDIS_MOCK === 'true' || process.env.NODE_ENV === 'test';
-const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+const redisUrl = process.env.REDIS_URL;
+const useMock = process.env.USE_REDIS_MOCK === 'true' || process.env.NODE_ENV === 'test' || !redisUrl;
 
 let redis;
 
 if (useMock) {
-    console.log('Using ioredis-mock for persistence');
+    console.log('Using ioredis-mock for persistence (Data will be ephemeral)');
+    if (process.env.NODE_ENV === 'production') {
+        console.warn('WARNING: REDIS_URL not provided. Using in-memory mock. Data will be lost on restart.');
+    }
     redis = new MockRedis();
 } else {
     redis = new Redis(redisUrl, {
