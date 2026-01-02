@@ -30,7 +30,7 @@ router.post('/pastes', async (req, res) => {
     }
 
     try {
-        const paste = await pasteService.createPaste(content, ttl_seconds, max_views);
+        const paste = await pasteService.createPaste(content, ttl_seconds, max_views, req.now);
         const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
 
         res.status(201).json({

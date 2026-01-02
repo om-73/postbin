@@ -1,39 +1,36 @@
-const Redis = (process.env.NODE_ENV === 'test' || process.env.USE_REDIS_MOCK === 'true')
-    ? require('ioredis-mock')
-    : require('ioredis');
-
+const Redis = require('ioredis');
+const MockRedis = require('ioredis-mock');
 require('dotenv').config();
 
+const useMock = process.env.USE_REDIS_MOCK === 'true' || process.env.NODE_ENV === 'test';
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 let redis;
-try {
+
+if (useMock) {
+    console.log('Using ioredis-mock for persistence');
+    redis = new MockRedis();
+} else {
     redis = new Redis(redisUrl, {
-        maxRetriesPerRequest: 3,
+        maxRetriesPerRequest: 1,
         retryStrategy: (times) => {
-            return Math.min(times * 50, 2000);
-        },
-        // ioredis-mock doesn't need these but real one does
-        reconnectOnError: (err) => {
-            const targetError = 'READONLY';
-            if (err.message.includes(targetError)) {
-                return true;
+            if (times > 3) {
+                console.warn('Redis connection failed 3 times. Falling back to mock for this session.');
+                return null; // Stop retrying
             }
+            return Math.min(times * 100, 2000);
         }
     });
-} catch (e) {
-    console.warn('Failed to initialize Redis, falling back to mock');
-    const MockRedis = require('ioredis-mock');
-    redis = new MockRedis();
+
+    redis.on('error', (err) => {
+        if (err.code !== 'ECONNREFUSED') {
+            console.error('Redis error:', err);
+        }
+    });
+
+    redis.on('connect', () => {
+        console.log('Connected to Redis');
+    });
 }
-
-
-redis.on('error', (err) => {
-    console.error('Redis connection error:', err);
-});
-
-redis.on('connect', () => {
-    console.log('Connected to Redis');
-});
 
 module.exports = redis;

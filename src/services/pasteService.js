@@ -2,9 +2,9 @@ const redis = require('../config/redis');
 const { v4: uuidv4 } = require('uuid');
 
 class PasteService {
-    async createPaste(content, ttl_seconds, max_views) {
+    async createPaste(content, ttl_seconds, max_views, nowOverride = null) {
         const id = uuidv4();
-        const now = Date.now();
+        const now = nowOverride || Date.now();
 
         const pasteData = {
             id,
@@ -21,8 +21,8 @@ class PasteService {
         await redis.set(`paste:${id}:views`, 0);
 
         // Set Redis expiry if TTL is provided (as a cleanup mechanism)
-        if (ttl_seconds) {
-            await redis.expire(`paste:${id}:data`, ttl_seconds + 3600); // Buffer for deterministic testing
+        if (ttl_seconds && typeof redis.expire === 'function') {
+            await redis.expire(`paste:${id}:data`, ttl_seconds + 3600);
             await redis.expire(`paste:${id}:views`, ttl_seconds + 3600);
         }
 
@@ -37,16 +37,15 @@ class PasteService {
 
         const data = JSON.parse(dataStr);
 
-        // Check Expiry
+        // Check Expiry Logic
         if (data.expires_at && now >= data.expires_at) {
             return null;
         }
 
-        // Check View Limit and Increment
+        // Check View Limit Logic
         const currentViews = await redis.incr(`paste:${id}:views`);
 
         if (data.max_views && currentViews > data.max_views) {
-            // If we just exceeded the limit, we could mark it or just return null
             return null;
         }
 

@@ -1,0 +1,131 @@
+{
+    "info": {
+        "_postman_id": "pastebin-lite-collection",
+        "name": "Pastebin-Lite API",
+        "description": "Collection for testing Pastebin-Lite endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Health Check",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://127.0.0.1:3000/api/healthz",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "healthz"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Create Paste",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"content\": \"Hello from Postman!\",\n    \"ttl_seconds\": 60,\n    \"max_views\": 5\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "http://127.0.0.1:3000/api/pastes",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "pastes"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Fetch Paste API",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "x-test-now-ms",
+                        "value": "1735815600000",
+                        "description": "Optional deterministic time header",
+                        "disabled": true
+                    }
+                ],
+                "url": {
+                    "raw": "http://127.0.0.1:3000/api/pastes/:id",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "api",
+                        "pastes",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "your-paste-id-here"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "View Paste HTML",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "http://127.0.0.1:3000/p/:id",
+                    "protocol": "http",
+                    "host": [
+                        "127",
+                        "0",
+                        "0",
+                        "1"
+                    ],
+                    "port": "3000",
+                    "path": [
+                        "p",
+                        ":id"
+                    ],
+                    "variable": [
+                        {
+                            "key": "id",
+                            "value": "your-paste-id-here"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

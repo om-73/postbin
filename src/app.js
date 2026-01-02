@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve static files (for the UI to create pastes)
+// Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Global middleware for deterministic time
@@ -24,6 +24,8 @@ app.use('/p', viewRoutes);
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
+
 
 // Error handling
 app.use((req, res) => {

@@ -1,9 +1,12 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://127.0.0.1:3000';
 
 async function runTests() {
     console.log('--- Starting Tests ---');
+
+    // Simple wait for server to start if running in parallel
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     try {
         // 1. Health check
@@ -36,7 +39,11 @@ async function runTests() {
         try {
             await axios.get(`${BASE_URL}/api/pastes/${id}`);
         } catch (err) {
-            console.log('View 3 Status:', err.response.status, '(Expected 404)');
+            if (err.response) {
+                console.log('View 3 Status:', err.response.status, '(Expected 404)');
+            } else {
+                console.log('View 3 Failed:', err.message);
+            }
         }
 
         // 6. Test Expiry (Deterministic Time)
@@ -60,14 +67,24 @@ async function runTests() {
                 headers: { 'x-test-now-ms': (now + 20000).toString() }
             });
         } catch (err) {
-            console.log('After Expiry Status:', err.response.status, '(Expected 404)');
+            if (err.response) {
+                console.log('After Expiry Status:', err.response.status, '(Expected 404)');
+            } else {
+                console.log('After Expiry Failed:', err.message);
+            }
         }
 
         console.log('\n--- All Tests Completed ---');
     } catch (err) {
         console.error('Test Failed:', err.message);
-        if (err.response) console.log('Response Data:', err.response.data);
+        if (err.response) {
+            console.log('Response Status:', err.response.status);
+            console.log('Response Data:', err.response.data);
+        } else {
+            console.log('Full Error:', err);
+        }
     }
 }
 
 runTests();
+
