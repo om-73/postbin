@@ -3,25 +3,38 @@ const router = express.Router();
 const pasteService = require('../services/pasteService');
 
 router.get('/:id', async (req, res) => {
-    try {
-        const paste = await pasteService.getPaste(req.params.id, req.now);
+  try {
+    const paste = await pasteService.getPaste(req.params.id, req.now);
 
-        if (!paste) {
-            return res.status(404).send('<h1>404 Paste Not Found</h1><p>The paste may have expired or reached its view limit.</p>');
-        }
+    if (!paste) {
+      let errorHtml = '<h1>404 Paste Not Found</h1><p>The paste may have expired or reached its view limit.</p>';
 
-        // Basic HTML escaping helper
-        const escapeHTML = (str) => {
-            return str.replace(/[&<>"']/g, (m) => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#39;'
-            })[m]);
-        };
+      // Helpful hint for Vercel/Serverless users without real Redis
+      const isMock = process.env.USE_REDIS_MOCK === 'true' || !process.env.REDIS_URL;
+      if (isMock) {
+        errorHtml += `
+                    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 4px;">
+                        <strong>Deployment Warning:</strong> You are using an in-memory database (Mock Redis). 
+                        Pastes are lost when the serverless function restarts or sleeps. 
+                        Please configure <code>REDIS_URL</code> for persistent storage.
+                    </div>
+                `;
+      }
+      return res.status(404).send(errorHtml);
+    }
 
-        res.send(`
+    // Basic HTML escaping helper
+    const escapeHTML = (str) => {
+      return str.replace(/[&<>"']/g, (m) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[m]);
+    };
+
+    res.send(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -48,10 +61,10 @@ router.get('/:id', async (req, res) => {
       </body>
       </html>
     `);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 module.exports = router;
