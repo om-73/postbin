@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pastebin-Lite</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 600px; }
+    h1 { color: #333; margin-top: 0; }
+    textarea { width: 100%; height: 200px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; resize: vertical; box-sizing: border-box; }
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+    .option { display: flex; flex-direction: column; }
+    label { font-size: 0.9rem; color: #666; margin-bottom: 4px; }
+    input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #007bff; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 1rem; width: 100%; transition: background 0.2s; }
+    button:hover { background: #0056b3; }
+    #result { margin-top: 1.5rem; padding: 1rem; border-radius: 6px; display: none; }
+    .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    a { color: inherit; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Pastebin-Lite</h1>
+    <textarea id="content" placeholder="Enter your text here..."></textarea>
+    
+    <div class="options">
+      <div class="option">
+        <label>TTL (seconds)</label>
+        <input type="number" id="ttl" placeholder="Optional">
+      </div>
+      <div class="option">
+        <label>Max Views</label>
+        <input type="number" id="max_views" placeholder="Optional">
+      </div>
+    </div>
+    
+    <button onclick="createPaste()">Create Paste</button>
+    
+    <div id="result"></div>
+  </div>
+
+  <script>
+    async function createPaste() {
+      const content = document.getElementById('content').value;
+      const ttl = document.getElementById('ttl').value;
+      const maxViews = document.getElementById('max_views').value;
+      const resultDiv = document.getElementById('result');
+
+      resultDiv.style.display = 'none';
+
+      const body = { content };
+      if (ttl) body.ttl_seconds = parseInt(ttl);
+      if (maxViews) body.max_views = parseInt(maxViews);
+
+      try {
+        const response = await fetch('/api/pastes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          resultDiv.className = 'success';
+          resultDiv.innerHTML = `Paste created! Share link: <a href="${data.url}" target="_blank">${data.url}</a>`;
+          resultDiv.style.display = 'block';
+        } else {
+          resultDiv.className = 'error';
+          resultDiv.textContent = data.error || 'Something went wrong';
+          resultDiv.style.display = 'block';
+        }
+      } catch (err) {
+        resultDiv.className = 'error';
+        resultDiv.textContent = 'Failed to connect to server';
+        resultDiv.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
