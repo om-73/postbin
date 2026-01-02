@@ -46,3 +46,6 @@ This application uses **Redis** for persistence. Redis was chosen for its high p
 - `POST /api/pastes`: Create a new paste.
 - `GET /api/pastes/:id`: Retrieve paste metadata and content (counts as a view).
 - `GET /p/:id`: View paste content as HTML.
+
+## Deployed URL
+[Live on Vercel](https://your-app.vercel.app) (Placeholder - Replace after deployment)
